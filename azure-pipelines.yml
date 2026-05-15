@@ -1,0 +1,87 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+
+# -------------------
+# STAGE 1: VALIDATE
+# -------------------
+- stage: Validate
+  displayName: "Terraform Validate"
+  jobs:
+  - job: validate
+    steps:
+
+    - checkout: self
+
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+
+    - script: |
+        terraform init
+      displayName: "Terraform Init"
+
+    - script: |
+        terraform validate
+      displayName: "Terraform Validate"
+
+
+# -------------------
+# STAGE 2: PLAN
+# -------------------
+- stage: Plan
+  displayName: "Terraform Plan"
+  dependsOn: Validate
+  jobs:
+  - job: plan
+    steps:
+
+    - checkout: self
+
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+
+    - script: |
+        terraform init
+      displayName: "Terraform Init"
+
+    - script: |
+        terraform plan -out=tfplan
+      displayName: "Terraform Plan"
+
+
+# -------------------
+# STAGE 3: APPLY
+# -------------------
+- stage: Apply
+  displayName: "Terraform Apply"
+  dependsOn: Plan
+  condition: succeeded()
+  jobs:
+  - job: apply
+    steps:
+
+    - checkout: self
+
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+
+    - script: |
+        terraform init
+      displayName: "Terraform Init"
+
+    # 👇 THIS NEEDS AZURE SERVICE CONNECTION
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'github.com_nsdobal'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          terraform apply -auto-approve tfplan
+      displayName: "Terraform Apply"
