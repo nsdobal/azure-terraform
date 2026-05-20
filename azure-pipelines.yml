@@ -1,0 +1,60 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+
+# ---------------- VALIDATE ----------------
+- stage: Validate
+  jobs:
+  - job: validate
+    steps:
+    - checkout: self
+
+    - script: |
+        terraform init
+      displayName: "Terraform Init"
+
+    - script: |
+        terraform validate
+      displayName: "Terraform Validate"
+
+
+# ---------------- PLAN ----------------
+- stage: Plan
+  dependsOn: Validate
+  jobs:
+  - job: plan
+    steps:
+    - checkout: self
+
+    - script: |
+        terraform init
+      displayName: "Terraform Init"
+
+    - script: |
+        terraform plan -out=tfplan
+      displayName: "Terraform Plan"
+
+
+# ---------------- APPLY ----------------
+- stage: Apply
+  dependsOn: Plan
+  condition: succeeded()
+  jobs:
+  - job: apply
+    steps:
+    - checkout: self
+
+    # 🔐 REAL INDUSTRY METHOD (NO HARDCODED SECRETS)
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'github.com_nsdobal'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          terraform init
+          terraform apply -auto-approve tfplan
+      displayName: "Terraform Apply"
