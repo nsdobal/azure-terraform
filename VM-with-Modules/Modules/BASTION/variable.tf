@@ -11,27 +11,27 @@ variable "resource_group_name" {
 }
 
 variable "virtual_network_id" {
-    type = string  
+  type = string
 }
 
 variable "sku" {
-    type = string
+  type = string
 
-    # validation {
-    #   condition = contains("Developer","Basic","Standard","Premium",var.sku)
-    #   error_message = "This is not valid sku, lookup the sku"
-    # }
+  validation {
+    condition     = contains(["Developer", "Basic", "Standard", "Premium"], var.sku)
+    error_message = "This is not valid sku, lookup the sku - Developer,Basic,Standard,Premium"
+  }
 }
 
 variable "ip_configuration" {
   type = object({
-    name = string
-    subnet_id = string
+    name                 = string
+    subnet_id            = string
     public_ip_address_id = string
   })
 }
 
 variable "tags" {
-    type = map(string)
+  type = map(string)
 }
 

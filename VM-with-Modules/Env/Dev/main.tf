@@ -13,8 +13,8 @@ module "rg" {
 #### VNET ####
 
 module "vnet" {
-  source = "../../Modules/VNET"
-  depends_on = [ module.rg ]
+  source     = "../../Modules/VNET"
+  depends_on = [module.rg]
 
   for_each = var.vnets
 
@@ -30,8 +30,8 @@ module "vnet" {
 #### SUBNET ####
 
 module "subnet" {
-  source = "../../Modules/SUBNET"
-  depends_on = [ module.rg,module.vnet ]
+  source     = "../../Modules/SUBNET"
+  depends_on = [module.rg, module.vnet]
 
   for_each = var.subnets
 
@@ -45,8 +45,8 @@ module "subnet" {
 #### PIP ####
 
 module "pip" {
-  source = "../../Modules/PIP"
-  depends_on = [ module.rg ]
+  source     = "../../Modules/PIP"
+  depends_on = [module.rg]
 
   for_each            = var.pip
   name                = each.key
@@ -60,8 +60,8 @@ module "pip" {
 #### NSG ####
 
 module "nsg" {
-  source = "../../Modules/NSG"
-  depends_on = [ module.rg ]
+  source     = "../../Modules/NSG"
+  depends_on = [module.rg]
 
   for_each            = var.nsg
   name                = each.key
@@ -74,8 +74,8 @@ module "nsg" {
 #### NSG Rules ####
 
 module "rules" {
-  source = "../../Modules/RULES"
-  depends_on = [ module.rg,module.nsg ]
+  source     = "../../Modules/RULES"
+  depends_on = [module.rg, module.nsg]
 
   for_each                    = var.rules
   name                        = each.key
@@ -95,8 +95,8 @@ module "rules" {
 #### NSG-Attach ####
 
 module "nsg-attach" {
-  source   = "../../Modules/NSG-ATTACH"
-  depends_on = [ module.subnet,module.nsg ]
+  source     = "../../Modules/NSG-ATTACH"
+  depends_on = [module.subnet, module.nsg]
 
   for_each = var.nsg-attach
 
@@ -109,8 +109,8 @@ module "nsg-attach" {
 #### Linux-VM ####
 
 module "Linux-VM" {
-  source   = "../../Modules/Linux-VM"
-  depends_on = [ module.rg,module.pip,module.subnet,module.vnet ]
+  source     = "../../Modules/Linux-VM"
+  depends_on = [module.rg, module.pip, module.subnet, module.vnet]
 
   for_each = var.Linux-VMs
 
@@ -118,8 +118,8 @@ module "Linux-VM" {
   location            = each.value.location
   resource_group_name = module.rg[each.value.resource_group_name].rg-name
 
-  enable_pip           = each.value.enable_pip
-  subnet_id            = module.subnet[each.value.subnet].id
+  enable_pip = each.value.enable_pip
+  subnet_id  = module.subnet[each.value.subnet].id
   # public_ip_address_id = module.pip[each.value.pip].id
 
   # network_interface_ids = [
@@ -149,8 +149,8 @@ module "Linux-VM" {
 #### Bastion Host ####
 
 module "bastion" {
-  source = "../../Modules/BASTION"
-  depends_on = [ module.rg,module.vnet,module.vnet,module.subnet,module.pip ]
+  source     = "../../Modules/BASTION"
+  depends_on = [module.rg, module.vnet, module.vnet, module.subnet, module.pip]
 
   for_each            = var.bastion
   name                = each.value.name
@@ -170,8 +170,8 @@ module "bastion" {
 #### Windows Machine ####
 
 module "VM" {
-  source = "../../Modules/VM"
-  depends_on = [ module.rg,module.pip,module.subnet ]
+  source     = "../../Modules/VM"
+  depends_on = [module.rg, module.pip, module.subnet]
 
   for_each = local.vms_final
 

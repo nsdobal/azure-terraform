@@ -101,7 +101,7 @@ variable "Linux-VMs" {
     subnet = string
     # network_interface_ids = list(string)
     enable_pip = optional(bool, false)
-    pip        = optional (string)
+    pip        = optional(string)
     nsg        = optional(string, "")
 
     size = string

@@ -11,11 +11,6 @@ variable "name" {
 variable "resource_group_name" {
   description = "Specify Resource Group Name for NSG"
   type        = string
-
-  validation {
-    condition     = length(var.resource_group_name) > 0
-    error_message = "Resource Group Name cannot be empty for NSG"
-  }
 }
 
 variable "location" {

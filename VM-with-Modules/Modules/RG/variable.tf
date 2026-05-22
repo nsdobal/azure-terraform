@@ -30,7 +30,7 @@ variable "environment" {
 }
 
 variable "tags" {
-  description = "Tags to apply with RG, max 20 tags"
+  description = "Tags to apply with RG, max 10 tags"
   type        = map(string)
 
   validation {

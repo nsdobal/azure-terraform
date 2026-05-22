@@ -11,11 +11,6 @@ variable "name" {
 variable "resource_group_name" {
   description = "Specify the Resource Group name, where this subnet will be created"
   type        = string
-
-  validation {
-    condition     = length(var.resource_group_name) > 0
-    error_message = "Resource Group name cannot be empty for VNET"
-  }
 }
 
 variable "virtual_network_name" {

@@ -12,11 +12,6 @@ variable "name" {
 variable "resource_group_name" {
   description = "Specify Resource Group Name for Public-IP"
   type        = string
-
-  validation {
-    condition     = length(var.resource_group_name) > 0
-    error_message = "Resource Group Name cannot be empty for Public-IP"
-  }
 }
 
 
@@ -36,7 +31,7 @@ variable "allocation_method" {
 
   validation {
     condition     = contains(["static", "dynamic"], lower(var.allocation_method))
-    error_message = "Value is not allowed, Use either static or dynamic "
+    error_message = "Value is not allowed, Use either static or dynamic"
   }
 }
 
