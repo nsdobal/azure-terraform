@@ -1,0 +1,33 @@
+terraform/
+│
+├── modules/
+│   ├── rg/
+│   ├── network/
+│   ├── pip/
+│   ├── nic/
+│   ├── vm/
+│   ├── nsg/
+│
+├── envs/
+│   └── dev/
+│       ├── main.tf
+│       ├── variables.tf
+│       ├── terraform.tfvars
+│
+├── provider.tf
+├── versions.tf
+
+
+Example -
+
+Customer A
+ ├── 2 VNets
+ ├── 10 Subnets
+ ├── 40 VMs
+ ├── 15 PIPs
+ ├── 20 NSGs
+
+Customer B
+ ├── 1 VNet
+ ├── 3 Subnets
+ ├── 12 VMs
