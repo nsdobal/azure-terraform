@@ -2,8 +2,8 @@
 
 rg = {
 
-  dev-rg = {
-    name        = "dev-rg"
+  nd-dev-rg = {
+    name        = "nd-dev-rg"
     location    = "centralindia"
     environment = "dev"
     #   tags = {}
@@ -16,7 +16,7 @@ rg = {
 vnets = {
   alzr-vnet = {
     name                = "alzr-vnet"
-    resource_group_name = "dev-rg"
+    resource_group_name = "nd-dev-rg"
     location            = "centralindia"
     address_space       = ["10.0.0.0/16"]
     dns_servers         = []
@@ -31,36 +31,27 @@ subnets = {
 
   AzureBastionSubnet = {
     name                 = "AzureBastionSubnet"
-    resource_group_name  = "dev-rg"
-    virtual_network_name = "alzr-vnet"
-    address_prefixes     = ["10.0.0.0/24"]
-    # service_endpoints =[]
-  }
-
-  Netapp-subnet = {
-    name                 = "Netapp-subnet"
-    resource_group_name  = "dev-rg"
-    virtual_network_name = "alzr-vnet"
-    address_prefixes     = ["10.0.10.0/24"]
-    # service_endpoints =[]
-  }
-
-  subnet1 = {
-    name                 = "subnet1"
-    resource_group_name  = "dev-rg"
+    resource_group_name  = "nd-dev-rg"
     virtual_network_name = "alzr-vnet"
     address_prefixes     = ["10.0.1.0/24"]
     # service_endpoints =[]
   }
 
-  subnetfe = {
-    name                 = "subnetfe"
-    resource_group_name  = "dev-rg"
+  subnet-ag = {
+    name                 = "subnet-ag"
+    resource_group_name  = "nd-dev-rg"
     virtual_network_name = "alzr-vnet"
     address_prefixes     = ["10.0.2.0/24"]
     # service_endpoints =[]
   }
 
+  subnetfe = {
+    name                 = "subnetfe"
+    resource_group_name  = "nd-dev-rg"
+    virtual_network_name = "alzr-vnet"
+    address_prefixes     = ["10.0.3.0/24"]
+    # service_endpoints =[]
+  }
 }
 
 #### PIP ####
@@ -68,7 +59,7 @@ subnets = {
 pip = {
   bastion-pip = {
     name                = "bastion-pip"
-    resource_group_name = "dev-rg"
+    resource_group_name = "nd-dev-rg"
     location            = "centralindia"
     allocation_method   = "Static"
     environment         = "dev"
@@ -77,7 +68,7 @@ pip = {
 
   ag-pip = {
     name                = "ag-pip"
-    resource_group_name = "dev-rg"
+    resource_group_name = "nd-dev-rg"
     location            = "centralindia"
     allocation_method   = "Static"
     environment         = "dev"
@@ -89,29 +80,57 @@ pip = {
 #### NSG ####
 
 nsg = {
-  nsg-1 = {
-    name                = "nsg-1"
-    resource_group_name = "dev-rg"
+  nsg-ag = {
+    name                = "nsg-ag"
+    resource_group_name = "nd-dev-rg"
     location            = "centralindia"
     environment         = "dev"
-    tags                = { bastion-nsg = "all ports open" }
+    # tags                = { bastion-nsg = "all ports open" }
   }
 }
 
 #### NSG RULES ####
 
 rules = {
-  nsg-rule-1 = {
-    name                        = "nsg-rule-1"
-    resource_group_name         = "dev-rg"
-    network_security_group_name = "nsg-1"
+  nsgrules-ag-allow-http = {
+    name                        = "nsgrules-ag-allow-http"
+    resource_group_name         = "nd-dev-rg"
+    network_security_group_name = "nsg-ag"
     priority                    = 200
     direction                   = "Inbound"
     access                      = "Allow"
     protocol                    = "Tcp"
     source_port_range           = "*"
-    destination_port_ranges     = ["3389"]
-    source_address_prefix       = "*"
+    destination_port_ranges     = ["80", "443"]
+    source_address_prefix       = "Internet"
+    destination_address_prefix  = "*"
+  }
+
+  nsgrules-ag-allow-http-lb = {
+    name                        = "nsgrules-ag-allow-http"
+    resource_group_name         = "nd-dev-rg"
+    network_security_group_name = "nsg-ag"
+    priority                    = 201
+    direction                   = "Inbound"
+    access                      = "Allow"
+    protocol                    = "Tcp"
+    source_port_range           = "*"
+    destination_port_ranges     = ["80", "443"]
+    source_address_prefix       = "AzureLoadBalancer"
+    destination_address_prefix  = "*"
+  }
+
+  allow_gateway_manager = {
+    name                        = "allow-gateway-manager"
+    resource_group_name         = "nd-dev-rg"
+    network_security_group_name = "nsg-ag"
+    priority                    = 220
+    direction                   = "Inbound"
+    access                      = "Allow"
+    protocol                    = "Tcp"
+    source_port_range           = "*"
+    destination_port_ranges     = ["65200-65535"]
+    source_address_prefix       = "GatewayManager"
     destination_address_prefix  = "*"
   }
 }
@@ -125,9 +144,9 @@ nsg-attach = {
   #   network_security_group = "bastion-nsg"
   # }
 
-  "nsg-attach-vm1" = {
-    subnet                 = "subnet1"
-    network_security_group = "nsg-1"
+  "nsg-attach-bastion" = {
+    subnet                 = "subnet-ag"
+    network_security_group = "nsg-ag"
   }
 }
 
@@ -135,22 +154,22 @@ nsg-attach = {
 #### BASTION ####
 
 bastion = {
-  # "alzr" = {
-  #   name                = "alzr"
-  #   location            = "centralindia"
-  #   resource_group_name = "dev-rg"
-  #   vnet                = "alzr-vnet"
-  #   sku                 = "Basic" # "Standard" # optional
-  #   ip_configuration = {
-  #     name   = "bastion_ipname"
-  #     subnet = "AzureBastionSubnet"
-  #     pip    = "bastion-pip"
-  #   }
-  #   tags = {
-  #     project = "alzr"
-  #     env     = "dev"
-  #   }
-  # }
+  "alzr" = {
+    name                = "alzr"
+    location            = "centralindia"
+    resource_group_name = "nd-dev-rg"
+    vnet                = "alzr-vnet"
+    sku                 = "Basic" # "Standard" # optional
+    ip_configuration = {
+      name   = "bastion-ipname"
+      subnet = "AzureBastionSubnet"
+      pip    = "bastion-pip"
+    }
+    tags = {
+      project = "alzr"
+      env     = "dev"
+    }
+  }
 }
 
 
@@ -158,27 +177,29 @@ bastion = {
 
 
 vms = {
-  # Windows-vm1 = {
-  #   name                = "Windows-vm1"
-  #   location            = "centralindia"
-  #   resource_group_name = "dev-rg"
-  #   subnet              = "subnetfe"
+  Windows-vm1 = {
+    name                = "Windows-vm1"
+    location            = "centralindia"
+    resource_group_name = "nd-dev-rg"
+    subnet              = "subnetfe"
 
-  #   vm_size = "Standard_B2ls_v2" # "Standard_B2ls_v2"
+    vm_size = "Standard_B2ls_v2" # "Standard_B2ls_v2"
 
-  #   storage_image_reference = {
-  #     publisher = "microsoftwindowsserver"
-  #     offer     = "windowsserver2022"
-  #     sku       = "2022-datacenter-azure-edition"
-  #     version   = "latest"
-  #   }
-  # }
+    storage_image_reference = {
+      publisher = "microsoftwindowsserver"
+      offer     = "windowsserver2022"
+      sku       = "2022-datacenter-azure-edition"
+      version   = "latest"
+    }
+  }
 
-  # Windows-vm2 = {
-  #   name    = "Windows-vm2"
-  #   subnet  = "subnetfe"
-  #   vm_size = "Standard_B2ls_v2" # "Standard_B2ls_v2"
-  # }
+  Windows-vm2 = {
+    name                = "Windows-vm2"
+    resource_group_name = "nd-dev-rg"
+    subnet              = "subnetfe"
+    location            = "centralindia"
+    vm_size             = "Standard_B2ls_v2" # "Standard_B2ls_v2"
+  }
 }
 
 #### Linux VM ####
@@ -187,7 +208,7 @@ Linux-VMs = {
   # linux-vm1 = {
   #   name                = "linux-vm1"
   #   location            = "centralindia"
-  #   resource_group_name = "dev-rg"
+  #   resource_group_name = "nd-dev-rg"
 
   #   vnet   = "alzr-vnet" #optional
   #   subnet = "subnet1"
@@ -218,7 +239,7 @@ Linux-VMs = {
   # vm3 = {
   #   name                = "vm3"
   #   location            = "centralindia"
-  #   resource_group_name = "dev-rg"
+  #   resource_group_name = "nd-dev-rg"
 
   #   vnet   = "alzr-vnet" #optional
   #   subnet = "subnet2"

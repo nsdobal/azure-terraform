@@ -4,7 +4,7 @@
 locals {
   vm_defaults = {
     location            = "centralindia"
-    resource_group_name = "dev-rg"
+    resource_group_name = "nd-dev-rg"
     enable_pip          = false
 
     vm_size           = "Standard_B2ls_v2"
